@@ -6,26 +6,27 @@ def download_video(url, format):
     output_path = "downloads"
     os.makedirs(output_path, exist_ok=True)
     
-    # Cabeçalhos HTTP para contornar o erro 403
+    # Cabeçalhos HTTP para evitar erro 403
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36'
     }
-    
-    # Opções do yt-dlp
-    options = {
-        'format': 'bestaudio/best' if format == 'mp3' else 'bestvideo+bestaudio',
-        'outtmpl': os.path.join(output_path, '%(title)s.%(ext)s'),
-        'http_headers': headers,  # Cabeçalhos HTTP
-        'quiet': True,  # Suprime a saída excessiva do yt-dlp
-        'no_postoverwrites': True,  # Impede sobrescrever downloads
-    }
 
+    # Definir formato do download
     if format == 'mp3':
-        options['postprocessors'] = [{
-            'key': 'FFmpegExtractAudio',
-            'preferredcodec': 'mp3',
-        }]
-
+        options = {
+            'format': 'bestaudio/best',
+            'outtmpl': os.path.join(output_path, '%(title)s.%(ext)s'),
+            'http_headers': headers,
+            'quiet': True,
+        }
+    else:
+        options = {
+            'format': 'bestvideo+bestaudio/best',
+            'outtmpl': os.path.join(output_path, '%(title)s.%(ext)s'),
+            'http_headers': headers,
+            'quiet': True,
+        }
+    
     with yt_dlp.YoutubeDL(options) as ydl:
         try:
             ydl.download([url])
@@ -33,7 +34,7 @@ def download_video(url, format):
         except Exception as e:
             st.error(f"Erro ao baixar: {str(e)}")
 
-# Interface do Streamlit
+# Interface Streamlit
 st.set_page_config(page_title="YouTube Downloader", page_icon="🎵", layout="centered")
 st.markdown("""
     <style>
